@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/SDC-6-DCJ/Product-Service/issues"
   },
-  "homepage": "https://github.com/SDC-6-DCJ/Product-Service#readme"
+  "homepage": "https://github.com/SDC-6-DCJ/Product-Service#readme",
+  "dependencies": {
+    "mongoose": "^6.9.1"
+  }
 }
