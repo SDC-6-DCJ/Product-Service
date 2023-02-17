@@ -19,6 +19,7 @@ CREATE TABLE products (
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX products_index ON products(id);
 
 CREATE TABLE styles (
     id                SERIAL PRIMARY KEY,
@@ -28,12 +29,14 @@ CREATE TABLE styles (
     original_price    NUMERIC(11, 2),
     default_style     BOOLEAN
 );
+CREATE INDEX styles_index ON styles(product_id);
 
 CREATE TABLE related (
     id                  SERIAL PRIMARY KEY,
     current_product_id  SERIAL REFERENCES products (id),
     related_product_id  INTEGER
 );
+CREATE INDEX related_index ON related(product_id);
 
 CREATE TABLE features (
     id             SERIAL PRIMARY KEY,
@@ -41,6 +44,7 @@ CREATE TABLE features (
     feature        VARCHAR(50),
     value          VARCHAR(50)
 );
+CREATE INDEX features_index ON features(product_id);
 
 CREATE TABLE skus (
     id             SERIAL PRIMARY KEY,
@@ -48,6 +52,7 @@ CREATE TABLE skus (
     size           VARCHAR(10),
     quantity       SMALLINT
 );
+CREATE INDEX skus_index ON skus(style_id);
 
 CREATE TABLE photos (
     id             SERIAL PRIMARY KEY,
@@ -55,6 +60,7 @@ CREATE TABLE photos (
     url            VARCHAR(2048) NOT NULL,
     thumbnail_url  VARCHAR(2048) NOT NULL
 );
+CREATE INDEX photos_index ON photos(style_id);
 
 COPY products(id,name,slogan,description,category,default_price)
 FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/product.csv'
