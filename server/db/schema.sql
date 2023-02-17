@@ -36,7 +36,7 @@ CREATE TABLE related (
     current_product_id  SERIAL REFERENCES products (id),
     related_product_id  INTEGER
 );
-CREATE INDEX related_index ON related(product_id);
+CREATE INDEX related_index ON related(current_product_id);
 
 CREATE TABLE features (
     id             SERIAL PRIMARY KEY,
