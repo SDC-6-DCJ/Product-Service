@@ -24,7 +24,7 @@ CREATE TABLE styles (
     id                SERIAL PRIMARY KEY,
     product_id        SERIAL REFERENCES products (id),
     name              VARCHAR(50),
-    sale_price        NUMERIC(5, 2) NULL,
+    sale_price        NUMERIC(6, 2),
     original_price    NUMERIC(11, 2),
     default_style     BOOLEAN
 );
@@ -52,11 +52,30 @@ CREATE TABLE skus (
 CREATE TABLE photos (
     id             SERIAL PRIMARY KEY,
     style_id       SERIAL REFERENCES styles (id),
-    url            TEXT,
-    thumbnail_url  TEXT
+    url            VARCHAR(2048) NOT NULL,
+    thumbnail_url  VARCHAR(2048) NOT NULL
 );
 
 COPY products(id,name,slogan,description,category,default_price)
-FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/data/product.csv'
-DELIMITER ','
-CSV HEADER;
+FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/product.csv'
+DELIMITER ',' CSV HEADER;
+
+COPY styles(id,product_id,name,sale_price,original_price,default_style)
+FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/styles.csv'
+DELIMITER ',' NULL AS 'null' CSV HEADER;
+
+COPY related (id,current_product_id,related_product_id)
+FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/related.csv'
+DELIMITER ',' CSV HEADER;
+
+COPY features (id,product_id,feature,value)
+FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/features.csv'
+DELIMITER ',' NULL AS 'null' CSV HEADER;
+
+COPY skus (id,style_id,size,quantity)
+FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/skus.csv'
+DELIMITER ',' NULL AS 'null' CSV HEADER;
+
+COPY photos (id,style_id,url,thumbnail_url)
+FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/photos.csv'
+DELIMITER ',' CSV HEADER;
