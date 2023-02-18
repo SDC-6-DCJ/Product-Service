@@ -3,7 +3,6 @@ require('dotenv').config();
 const { Client } = require("pg");
 
 const credentials = {
-  // user: process.env.DB_USER,
   host: process.env.HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASS,
