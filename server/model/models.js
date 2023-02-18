@@ -19,15 +19,23 @@ const getProducts= ((page = 1, count = 5) => {
 
 // GET /products/:product_id
 const getProductById = ((id) => {
+  let product;
   client
     .query('SELECT * FROM products WHERE id=$1', [id])
     .then((result) => {
-      console.log('result.rows: ', result.rows)
+      product = result.rows[0];
+    })
+    .then(() => {
+      client
+        .query('SELECT * FROM features WHERE product_id=$1', [id])
+        .then((res) => {
+          product.features = res.rows;
+          console.log('product: ', product)
+        })
     })
     .catch((error) => console.error('error: ', error))
 })
-getProductById('40344');
-console.log()
+getProductById(13);
 
 // // GET /products/:product_id/related
 // const getRelatedProduct = ((name) => {
