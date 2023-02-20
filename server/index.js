@@ -7,7 +7,6 @@ const { HOST, LOCAL_PORT } = process.env;
 
 const app = express();
 
-/* MIDDLEWARE */
 app.use(morgan('dev'));
 app.use(express.json());
 
