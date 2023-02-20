@@ -55,24 +55,44 @@ const getProductStyle = ((id) => {
   styles.sale_price,
   styles.original_price,
   styles.default_style AS "default?",
-  array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)) as photos,
-  json_object_agg(skus.id,
-  json_build_object('quantity',
-  skus.quantity, 'size',
-  skus.size)) AS skus
+  CASE
+    WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]::json[]
+    ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)
+    ) END as photos,
+  CASE
+    WHEN skus.id IS NULL THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL)) ELSE json_build_object(
+      'quantity', COALESCE(skus.quantity, NULL),
+      'size', COALESCE(skus.size, NULL)
+    ) END AS skus
 FROM styles
 LEFT JOIN photos ON styles.id = photos.style_id
 LEFT JOIN skus ON styles.id = skus.style_id
 WHERE product_id=$1
-GROUP BY styles.id, skus.id`;
+GROUP BY styles.id, skus.id;`;
+
+  const query1 = `SELECT
+    styles.id AS style_id,
+    styles.name,
+    styles.sale_price,
+    styles.original_price,
+    styles.default_style AS "default?",
+    CASE
+      WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]::json[]
+      ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)
+      ) END as photos
+  FROM styles
+  LEFT JOIN photos ON styles.id = photos.style_id
+  WHERE product_id=$1
+  GROUP BY styles.id;`;
 
   const query2 = `SELECT
-  json_build_object("id",
-  json_build_object('quantity',
-  skus.quantity, 'size',
-  skus.size)) AS skus
+  CASE
+  WHEN skus.id IS NULL THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL)) ELSE json_build_object(
+    'quantity', COALESCE(skus.quantity, NULL),
+    'size', COALESCE(skus.size, NULL)
+  ) END AS skus`
 
-FROM skus WHERE style_id=$1;`;
+
   return client
     .query(query, [id])
     .then((res) => {
@@ -86,5 +106,5 @@ module.exports = {
   getProducts,
   getProductById,
   getRelatedProduct,
-  getProductStyle
+  getProductStyle,
 };
