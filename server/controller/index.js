@@ -33,7 +33,7 @@ module.exports = {
       .then((results) => res.status(200).send(results))
       .catch((err) => {
         console.error('Controller error - getProductStyle: ', err);
-        res.sendStatus(500);
+        res.status(500).send(err.message);
       });
   },
 };

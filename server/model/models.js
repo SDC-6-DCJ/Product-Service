@@ -18,7 +18,7 @@ const getProducts = ((page = 1, count = 5) => {
 // GET /products/:product_id
 const getProductById = ((id) => {
   let product;
-  return client // promises need to be returned on the outer scope
+  return client
     .query('SELECT * FROM products WHERE id=$1', [id])
     .then(({ rows }) => {
       const [first] = rows;
@@ -53,21 +53,54 @@ const getProductStyle = ((id) => {
   CASE
     WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]::json[]
     ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)) END as photos,
-  (SELECT json_agg(
-    json_build_object(
-      CASE WHEN skus.id IS NULL THEN 0 ELSE skus.id END,
+  (SELECT CASE WHEN COUNT(skus)=0 THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL)) ELSE json_object_agg(
+      skus.id,
       json_build_object('quantity', skus.quantity, 'size', skus.size)
-    )
+  ) END AS skus FROM skus WHERE skus.style_id = styles.id)
+  FROM styles
+  LEFT JOIN photos ON styles.id = photos.style_id
+  WHERE product_id=$1
+  GROUP BY styles.id;`;
+
+  const query2 = `SELECT
+  styles.id AS style_id,
+  styles.name,
+  styles.sale_price,
+  styles.original_price,
+  styles.default_style AS "default?",
+  CASE
+    WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]::json[]
+    ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)) END as photos,
+  (SELECT CASE WHEN COUNT(*) = 0 THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL))
+    ELSE json_object_agg(skus.id,
+    json_build_object('quantity', skus.quantity, 'size', skus.size)
+  ) END FROM skus WHERE skus.style_id = styles.id) AS skus
+  FROM styles
+  LEFT JOIN photos ON styles.id = photos.style_id
+  WHERE product_id=$1
+  GROUP BY styles.id;`;
+
+  const query3 = `SELECT
+  styles.id AS style_id,
+  styles.name,
+  styles.sale_price,
+  styles.original_price,
+  styles.default_style AS "default?",
+  CASE
+    WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]::json[]
+    ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)) END as photos,
+  (SELECT json_object_agg(
+      skus.id,
+      json_build_object('quantity', skus.quantity, 'size', skus.size)
   ) FROM skus WHERE skus.style_id = styles.id) AS skus
-FROM styles
-LEFT JOIN photos ON styles.id = photos.style_id
-WHERE product_id=$1
-GROUP BY styles.id;`;
+  FROM styles
+  LEFT JOIN photos ON styles.id = photos.style_id
+  WHERE product_id=$1
+  GROUP BY styles.id;`;
 
   return client
-    .query(query, [id])
+    .query(query2, [id])
     .then((res) => {
-      console.log('res: ', res);
       return res.rows;
     });
 });
