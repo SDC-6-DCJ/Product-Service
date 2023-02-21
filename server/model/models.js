@@ -53,10 +53,13 @@ const getProductStyle = ((id) => {
   CASE
     WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]::json[]
     ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)) END as photos,
-  (SELECT CASE WHEN COUNT(skus)=0 THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL)) ELSE json_object_agg(
+  (SELECT CASE WHEN COUNT(skus)=0 THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL))
+    ELSE json_object_agg(
       skus.id,
       json_build_object('quantity', skus.quantity, 'size', skus.size)
-  ) END AS skus FROM skus WHERE skus.style_id = styles.id)
+    )
+    END AS skus FROM skus WHERE skus.style_id = styles.id
+  )
   FROM styles
   LEFT JOIN photos ON styles.id = photos.style_id
   WHERE product_id=$1
@@ -99,7 +102,7 @@ const getProductStyle = ((id) => {
   GROUP BY styles.id;`;
 
   return client
-    .query(query2, [id])
+    .query(query, [id])
     .then((res) => {
       return res.rows;
     });
