@@ -44,6 +44,7 @@ const getRelatedProduct = ((id) => client
 
 // GET /products/:product_id/styles
 const getProductStyle = ((id) => {
+  const product = { product_id: id };
   const query = `SELECT
   styles.id AS style_id,
   styles.name,
@@ -103,8 +104,9 @@ const getProductStyle = ((id) => {
 
   return client
     .query(query, [id])
-    .then((res) => {
-      return res.rows;
+    .then(({ rows }) => {
+      product.results = rows;
+      return product;
     });
 });
 
