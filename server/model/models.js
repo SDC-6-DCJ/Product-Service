@@ -2,13 +2,13 @@ const client = require('../db/index');
 
 // GET /products
 const getProducts = ((page = 1, count = 5) => {
-  page = Number(page);
-  count = Number(count);
+  const pg = Number(page);
+  const ct = Number(count);
   let id1 = 1;
-  let id2 = count;
-  if (page > 1) {
-    id1 = ((page - 1) * count) + 1;
-    id2 = id1 + count - 1;
+  let id2 = ct;
+  if (pg > 1) {
+    id1 = ((pg - 1) * ct) + 1;
+    id2 = id1 + ct - 1;
   }
   return client
     .query('SELECT * FROM products WHERE id >= $1 and id <= $2', [id1, id2])
@@ -24,28 +24,23 @@ const getProductById = ((id) => {
       const [first] = rows;
       product = first;
     })
-    .then(() => {
-      client
-        .query('SELECT * FROM features WHERE product_id=$1', [id])
-        .then((res) => {
-          product.features = res.rows;
-          return product;
-        });
+    .then(() => client.query('SELECT * FROM features WHERE product_id=$1', [id]))
+    .then((res) => {
+      product.features = res.rows;
+      return product;
     });
 });
 
 // GET /products/:product_id/related
-const getRelatedProduct = ((id) => {
-  return client
-    .query('SELECT * FROM related WHERE current_product_id=$1', [id])
-    .then((res) => {
-      let related = [];
-      for (let obj of res.rows) {
-        related.push(obj.related_product_id)
-      }
-      return related;
-    });
-});
+const getRelatedProduct = ((id) => client
+  .query('SELECT * FROM related WHERE current_product_id=$1', [id])
+  .then((res) => {
+    const related = [];
+    for (let i = 0; i < res.rows.length; i += 1) {
+      related.push(res.rows[i].related_product_id);
+    }
+    return related;
+  }));
 
 // GET /products/:product_id/styles
 const getProductStyle = ((id) => {
@@ -70,29 +65,6 @@ LEFT JOIN skus ON styles.id = skus.style_id
 WHERE product_id=$1
 GROUP BY styles.id, skus.id;`;
 
-  const query1 = `SELECT
-    styles.id AS style_id,
-    styles.name,
-    styles.sale_price,
-    styles.original_price,
-    styles.default_style AS "default?",
-    CASE
-      WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]::json[]
-      ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)
-      ) END as photos
-  FROM styles
-  LEFT JOIN photos ON styles.id = photos.style_id
-  WHERE product_id=$1
-  GROUP BY styles.id;`;
-
-  const query2 = `SELECT
-  CASE
-  WHEN skus.id IS NULL THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL)) ELSE json_build_object(
-    'quantity', COALESCE(skus.quantity, NULL),
-    'size', COALESCE(skus.size, NULL)
-  ) END AS skus`
-
-
   return client
     .query(query, [id])
     .then((res) => {
@@ -100,7 +72,6 @@ GROUP BY styles.id, skus.id;`;
       return res.rows;
     });
 });
-
 
 module.exports = {
   getProducts,
