@@ -34,13 +34,7 @@ const getProductById = ((id) => {
 // GET /products/:product_id/related
 const getRelatedProduct = ((id) => client
   .query('SELECT * FROM related WHERE current_product_id=$1', [id])
-  .then((res) => {
-    const related = [];
-    for (let i = 0; i < res.rows.length; i += 1) {
-      related.push(res.rows[i].related_product_id);
-    }
-    return related;
-  }));
+  .then((res) => res.rows.map((item) => item.related_product_id)));
 
 // GET /products/:product_id/styles
 const getProductStyle = ((id) => {
