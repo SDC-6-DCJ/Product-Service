@@ -2,6 +2,10 @@
 node_modules/
 data/
 
+# New Relic
+newrelic.js
+newrelic_agent.log
+
 # dotenv environment variables file
 .env
 .env.test
