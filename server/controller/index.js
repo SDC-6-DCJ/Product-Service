@@ -6,7 +6,7 @@ module.exports = {
       .then((results) => res.status(200).send(results))
       .catch((err) => {
         console.error('Controller error - getProducts: ', err);
-        res.sendStatus(500);
+        res.status(500).send(err.message);
       });
   },
 
@@ -15,7 +15,7 @@ module.exports = {
       .then((results) => res.status(200).send(results))
       .catch((err) => {
         console.error('Controller error - getProductById: ', err);
-        res.sendStatus(500);
+        res.status(500).send(err.message);
       });
   },
 
@@ -24,7 +24,7 @@ module.exports = {
       .then((results) => res.status(200).send(results))
       .catch((err) => {
         console.error('Controller error - getRelatedProduct: ', err);
-        res.sendStatus(500);
+        res.status(500).send(err.message);
       });
   },
 
@@ -33,7 +33,7 @@ module.exports = {
       .then((results) => res.status(200).send(results))
       .catch((err) => {
         console.error('Controller error - getProductStyle: ', err);
-        res.sendStatus(500);
+        res.status(500).send(err.message);
       });
   },
 };

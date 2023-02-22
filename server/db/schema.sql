@@ -84,4 +84,4 @@ DELIMITER ',' NULL AS 'null' CSV HEADER;
 
 COPY photos (id,style_id,url,thumbnail_url)
 FROM '/Users/brettaustineastman/workspace/BrettEastman/RFP2212/Product-Service/ETL/data/photos.csv'
-DELIMITER ',' CSV HEADER;
+DELIMITER ',' NULL AS 'null' CSV HEADER;
