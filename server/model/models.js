@@ -60,6 +60,36 @@ const getProductStyle = ((id) => {
   WHERE product_id=$1
   GROUP BY styles.id;`;
 
+  const query2 = `SELECT
+  styles.id AS style_id,
+  styles.name,
+  styles.sale_price,
+  styles.original_price,
+  styles.default_style AS "default?",
+  array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)) as photos,
+  (SELECT json_object_agg(
+      skus.id,
+      json_build_object('quantity', skus.quantity, 'size', skus.size)
+    )
+    AS skus FROM skus WHERE skus.style_id = styles.id
+  )
+  FROM styles
+  LEFT JOIN photos ON styles.id = photos.style_id
+  WHERE product_id=$1
+  GROUP BY styles.id;`;
+
+  // return client
+  //   .query(query2, [id])
+  //   .then(({ rows }) => {
+  //     product.results = rows;
+  //     for (let i = 0; i < product.results.length; i += 1) {
+  //       if (product.results[i].skus === null) {
+  //         product.results[i].skus = {};
+  //         product.results[i].skus.null = { quantity: null, size: null };
+  //       }
+  //     }
+  //     return product;
+  //   });
   return client
     .query(query, [id])
     .then(({ rows }) => {

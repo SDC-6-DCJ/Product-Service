@@ -15,12 +15,12 @@ export const options = {
 };
 
 export default () => {
-  const randomProductId = Math.floor(Math.random() * 1000000);
+  const randomProductId = Math.floor(Math.random() * 10 + 1);
   const BASE_URL = 'http://localhost:3000'; // make sure this is not production
   const responses = http.batch([
-    ['GET', `${BASE_URL}/api/products`],
-    ['GET', `${BASE_URL}/api/products/${randomProductId}`],
-    ['GET', `${BASE_URL}/api/products/${randomProductId}/related`],
+    // ['GET', `${BASE_URL}/api/products`],
+    // ['GET', `${BASE_URL}/api/products/${randomProductId}`],
+    // ['GET', `${BASE_URL}/api/products/${randomProductId}/related`],
     ['GET', `${BASE_URL}/api/products/${randomProductId}/styles`],
   ]);
   sleep(1);
