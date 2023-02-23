@@ -39,28 +39,8 @@ const getRelatedProduct = ((id) => client
 // GET /products/:product_id/styles
 const getProductStyle = ((id) => {
   const product = { product_id: id };
-  const query = `SELECT
-  styles.id AS style_id,
-  styles.name,
-  styles.sale_price,
-  styles.original_price,
-  styles.default_style AS "default?",
-  CASE
-    WHEN COUNT(photos.id)=0 THEN ARRAY[json_build_object('thumbnail_url', NULL, 'url', NULL)]
-    ELSE array_agg(json_build_object('thumbnail_url', photos.thumbnail_url, 'url', photos.url)) END as photos,
-  (SELECT CASE WHEN COUNT(skus)=0 THEN json_build_object('null', json_build_object('quantity', NULL, 'size', NULL))
-    ELSE json_object_agg(
-      skus.id,
-      json_build_object('quantity', skus.quantity, 'size', skus.size)
-    )
-    END AS skus FROM skus WHERE skus.style_id = styles.id
-  )
-  FROM styles
-  LEFT JOIN photos ON styles.id = photos.style_id
-  WHERE product_id=$1
-  GROUP BY styles.id;`;
 
-  const query2 = `SELECT
+  const query = `SELECT
   styles.id AS style_id,
   styles.name,
   styles.sale_price,
@@ -79,7 +59,7 @@ const getProductStyle = ((id) => {
   GROUP BY styles.id;`;
 
   return client
-    .query(query2, [id])
+    .query(query, [id])
     .then(({ rows }) => {
       product.results = rows;
       for (let i = 0; i < product.results.length; i += 1) {
@@ -90,12 +70,6 @@ const getProductStyle = ((id) => {
       }
       return product;
     });
-  // return client
-  //   .query(query, [id])
-  //   .then(({ rows }) => {
-  //     product.results = rows;
-  //     return product;
-  //   });
 });
 
 module.exports = {
