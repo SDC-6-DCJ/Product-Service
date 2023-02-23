@@ -78,24 +78,24 @@ const getProductStyle = ((id) => {
   WHERE product_id=$1
   GROUP BY styles.id;`;
 
-  // return client
-  //   .query(query2, [id])
-  //   .then(({ rows }) => {
-  //     product.results = rows;
-  //     for (let i = 0; i < product.results.length; i += 1) {
-  //       if (product.results[i].skus === null) {
-  //         product.results[i].skus = {};
-  //         product.results[i].skus.null = { quantity: null, size: null };
-  //       }
-  //     }
-  //     return product;
-  //   });
   return client
-    .query(query, [id])
+    .query(query2, [id])
     .then(({ rows }) => {
       product.results = rows;
+      for (let i = 0; i < product.results.length; i += 1) {
+        if (product.results[i].skus === null) {
+          product.results[i].skus = {};
+          product.results[i].skus.null = { quantity: null, size: null };
+        }
+      }
       return product;
     });
+  // return client
+  //   .query(query, [id])
+  //   .then(({ rows }) => {
+  //     product.results = rows;
+  //     return product;
+  //   });
 });
 
 module.exports = {
