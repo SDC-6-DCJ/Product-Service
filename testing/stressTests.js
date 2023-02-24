@@ -23,7 +23,7 @@ export const options = {
 };
 
 export default () => {
-  const randomProductId = Math.floor(Math.random() * 1000000);
+  const randomProductId = Math.floor(Math.random() * 100 + 900000);
   const BASE_URL = 'http://localhost:3000'; // make sure this is not production
   const responses = http.batch([
     ['GET', `${BASE_URL}/api/products`],
