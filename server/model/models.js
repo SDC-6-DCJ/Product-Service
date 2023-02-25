@@ -22,17 +22,21 @@ const getProducts = ((page = 1, count = 5) => {
 // GET /products/:product_id
 const getProductById = ((id) => {
   let product;
-  return client
-    .query('SELECT * FROM products WHERE id=$1', [id])
-    .then(({ rows }) => {
-      const [first] = rows;
-      product = first;
-    })
-    .then(() => client.query('SELECT * FROM features WHERE product_id=$1', [id]))
-    .then((res) => {
-      product.features = res.rows;
-      return product;
-    });
+  return pool.connect()
+    .then((client) => client
+      .query('SELECT * FROM products WHERE id=$1', [id])
+      .then(({ rows }) => {
+        const [first] = rows;
+        product = first;
+      })
+      .then(() => client.query('SELECT * FROM features WHERE product_id=$1', [id]))
+      .then((res) => {
+        product.features = res.rows;
+        return product;
+      })
+      .catch(() => {
+        client.release();
+      }));
 });
 
 // GET /products/:product_id/related
