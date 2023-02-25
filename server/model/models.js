@@ -40,9 +40,14 @@ const getProductById = ((id) => {
 });
 
 // GET /products/:product_id/related
-const getRelatedProduct = ((id) => client
-  .query('SELECT * FROM related WHERE current_product_id=$1', [id])
-  .then((res) => res.rows.map((item) => item.related_product_id)));
+const getRelatedProduct = ((id) => pool.connect()
+  .then((client) => client
+    .query('SELECT * FROM related WHERE current_product_id=$1', [id])
+    .then((res) => res.rows.map((item) => item.related_product_id))
+    .catch(() => {
+      client.release();
+    }))
+);
 
 // GET /products/:product_id/styles
 const getProductStyle = ((id) => {
