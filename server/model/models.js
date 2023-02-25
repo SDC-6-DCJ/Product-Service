@@ -1,4 +1,4 @@
-const client = require('../db/index');
+const pool = require('../db/index');
 
 // GET /products
 const getProducts = ((page = 1, count = 5) => {
@@ -10,31 +10,44 @@ const getProducts = ((page = 1, count = 5) => {
     id1 = ((pg - 1) * ct) + 1;
     id2 = id1 + ct - 1;
   }
-  return client
-    .query('SELECT * FROM products WHERE id >= $1 and id <= $2', [id1, id2])
-    .then((res) => res.rows);
+  return pool.connect()
+    .then((client) => client
+      .query('SELECT * FROM products WHERE id >= $1 and id <= $2', [id1, id2])
+      .then((res) => res.rows)
+      .catch(() => {
+        client.release();
+      }));
 });
 
 // GET /products/:product_id
 const getProductById = ((id) => {
   let product;
-  return client
-    .query('SELECT * FROM products WHERE id=$1', [id])
-    .then(({ rows }) => {
-      const [first] = rows;
-      product = first;
-    })
-    .then(() => client.query('SELECT * FROM features WHERE product_id=$1', [id]))
-    .then((res) => {
-      product.features = res.rows;
-      return product;
-    });
+  return pool.connect()
+    .then((client) => client
+      .query('SELECT * FROM products WHERE id=$1', [id])
+      .then(({ rows }) => {
+        const [first] = rows;
+        product = first;
+      })
+      .then(() => client.query('SELECT * FROM features WHERE product_id=$1', [id]))
+      .then((res) => {
+        product.features = res.rows;
+        return product;
+      })
+      .catch(() => {
+        client.release();
+      }));
 });
 
 // GET /products/:product_id/related
-const getRelatedProduct = ((id) => client
-  .query('SELECT * FROM related WHERE current_product_id=$1', [id])
-  .then((res) => res.rows.map((item) => item.related_product_id)));
+const getRelatedProduct = ((id) => pool.connect()
+  .then((client) => client
+    .query('SELECT * FROM related WHERE current_product_id=$1', [id])
+    .then((res) => res.rows.map((item) => item.related_product_id))
+    .catch(() => {
+      client.release();
+    }))
+);
 
 // GET /products/:product_id/styles
 const getProductStyle = ((id) => {
@@ -58,18 +71,22 @@ const getProductStyle = ((id) => {
   WHERE product_id=$1
   GROUP BY styles.id;`;
 
-  return client
-    .query(query, [id])
-    .then(({ rows }) => {
-      product.results = rows;
-      for (let i = 0; i < product.results.length; i += 1) {
-        if (product.results[i].skus === null) {
-          product.results[i].skus = {};
-          product.results[i].skus.null = { quantity: null, size: null };
+  return pool.connect()
+    .then((client) => client
+      .query(query, [id])
+      .then(({ rows }) => {
+        product.results = rows;
+        for (let i = 0; i < product.results.length; i += 1) {
+          if (product.results[i].skus === null) {
+            product.results[i].skus = {};
+            product.results[i].skus.null = { quantity: null, size: null };
+          }
         }
-      }
-      return product;
-    });
+        return product;
+      })
+      .catch(() => {
+        client.relase();
+      }));
 });
 
 module.exports = {
