@@ -1,4 +1,4 @@
-const client = require('../db/index');
+const pool = require('../db/index');
 
 // GET /products
 const getProducts = ((page = 1, count = 5) => {
@@ -10,9 +10,13 @@ const getProducts = ((page = 1, count = 5) => {
     id1 = ((pg - 1) * ct) + 1;
     id2 = id1 + ct - 1;
   }
-  return client
-    .query('SELECT * FROM products WHERE id >= $1 and id <= $2', [id1, id2])
-    .then((res) => res.rows);
+  return pool.connect()
+    .then((client) => client
+      .query('SELECT * FROM products WHERE id >= $1 and id <= $2', [id1, id2])
+      .then((res) => res.rows)
+      .catch(() => {
+        client.release();
+      }));
 });
 
 // GET /products/:product_id
