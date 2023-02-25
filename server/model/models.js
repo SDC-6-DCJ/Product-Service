@@ -13,9 +13,13 @@ const getProducts = ((page = 1, count = 5) => {
   return pool.connect()
     .then((client) => client
       .query('SELECT * FROM products WHERE id >= $1 and id <= $2', [id1, id2])
-      .then((res) => res.rows)
-      .catch(() => {
+      .then((res) => {
         client.release();
+        return res.rows;
+      })
+      .catch((err) => {
+        client.release();
+        return err;
       }));
 });
 
@@ -31,6 +35,7 @@ const getProductById = ((id) => {
       })
       .then(() => client.query('SELECT * FROM features WHERE product_id=$1', [id]))
       .then((res) => {
+        client.release();
         product.features = res.rows;
         return product;
       })
@@ -43,7 +48,10 @@ const getProductById = ((id) => {
 const getRelatedProduct = ((id) => pool.connect()
   .then((client) => client
     .query('SELECT * FROM related WHERE current_product_id=$1', [id])
-    .then((res) => res.rows.map((item) => item.related_product_id))
+    .then((res) => {
+      client.release();
+      return res.rows.map((item) => item.related_product_id);
+    })
     .catch(() => {
       client.release();
     }))
@@ -75,6 +83,7 @@ const getProductStyle = ((id) => {
     .then((client) => client
       .query(query, [id])
       .then(({ rows }) => {
+        client.release();
         product.results = rows;
         for (let i = 0; i < product.results.length; i += 1) {
           if (product.results[i].skus === null) {
@@ -85,7 +94,7 @@ const getProductStyle = ((id) => {
         return product;
       })
       .catch(() => {
-        client.relase();
+        client.release();
       }));
 });
 
