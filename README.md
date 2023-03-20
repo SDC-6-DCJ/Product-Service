@@ -42,7 +42,7 @@ The following are the services provided by this API.
       "slogan": "String",
       "description": "String",
       "category": "String",
-      "default_price": "String",
+      "default_price": "Number",
       "created_at": "String",
       "updated_at": "String"
     }
