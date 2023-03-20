@@ -5,7 +5,7 @@ This service acts as a back-end system to provide the resources and data for all
 
 ### Getting Started
   * Run `npm install` to download dependencies
-  * Run `npm start` to start server running on Port 3001
+  * Run `npm run server-dev` to start server running on Port 3000
   * Create a .env file and fill in the appropriate values (note LOADER_IO is optionally for testing):
     DB_USER=username
     DB_HOST=localhost
